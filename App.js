@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import {useState, useEffect} from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -14,6 +15,7 @@ import {
   View,
   Text,
   StatusBar,
+  Linking,
 } from 'react-native';
 
 import {
@@ -24,11 +26,48 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
+const useMount = (func) => useEffect(() => func(), []);
+
+const useInitialURL = () => {
+  const [url, setUrl] = useState(null);
+  const [processing, setProcessing] = useState(true);
+
+  useMount(() => {
+    const getUrlAsync = async () => {
+      // Get the deep link used to open the app
+      const initialUrl = await Linking.getInitialURL();
+
+      // The setTimeout is just for testing purpose
+      setTimeout(() => {
+        setUrl(initialUrl);
+        setProcessing(false);
+      }, 1000);
+    };
+    getUrlAsync();
+
+    Linking.addEventListener('url', (event) => {
+      setUrl(event.url);
+      setProcessing(false);
+    });
+  });
+
+  return {url, processing};
+};
+
 const App: () => React$Node = () => {
+  const {url: initialUrl, processing} = useInitialURL();
+  useInitialURL();
+
   return (
     <>
       <StatusBar barStyle="dark-content" />
       <SafeAreaView>
+        <Text>
+          {processing
+            ? `Processing the initial url from a deep link`
+            : `The deep link is: ${initialUrl || 'None'}`}
+        </Text>
+        {/*
         <ScrollView
           contentInsetAdjustmentBehavior="automatic"
           style={styles.scrollView}>
@@ -67,6 +106,7 @@ const App: () => React$Node = () => {
             <LearnMoreLinks />
           </View>
         </ScrollView>
+        */}
       </SafeAreaView>
     </>
   );
