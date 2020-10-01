@@ -12,4 +12,11 @@ public class MainActivity extends ReactActivity {
   protected String getMainComponentName() {
     return "DeepLinking";
   }
+
+  @Override
+  protected void onCreate(Bundle savedInstanceState) {
+      Intent appLinkIntent = getIntent();
+      String appLinkAction = appLinkIntent.getAction();
+      Uri appLinkData = appLinkIntent.getData();
+  }
 }
